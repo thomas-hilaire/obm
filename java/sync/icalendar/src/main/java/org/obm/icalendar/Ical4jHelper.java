@@ -488,7 +488,7 @@ public class Ical4jHelper {
 
 	private void appendDate(Event event, DtStart startDate) {
 		if (startDate != null) {
-			event.setDate(startDate.getDate());
+			event.setStartDate(startDate.getDate());
 			event.setTimezoneName("Etc/GMT");
 		}
 
@@ -620,7 +620,7 @@ public class Ical4jHelper {
 	}
 
 	private void appendDurationToIcs(PropertyList prop, Event event) {
-		prop.add(new Duration(new Dur(event.getDate(), event.getEndDate())));
+		prop.add(new Duration(new Dur(event.getStartDate(), event.getEndDate())));
 	}
 	
 	private VEvent getVEvent(Ical4jUser iCal4jUser, Event event, Attendee replyAttendee, Method method) {
@@ -763,7 +763,7 @@ public class Ical4jHelper {
 
 	private void appendDuedToICS(PropertyList prop, Event event) {
 		if (event.getDuration() != 0) {
-			Due dtEnd = getDue(event.getDate(), event.getDuration());
+			Due dtEnd = getDue(event.getStartDate(), event.getDuration());
 			if (dtEnd != null) {
 				prop.add(dtEnd);
 			}
@@ -848,7 +848,7 @@ public class Ical4jHelper {
 	}
 
 	private void appendDtEndToICS(PropertyList prop, Event event) {
-		DtEnd dtEnd = getDtEnd(event.getDate(), event.getDuration(),
+		DtEnd dtEnd = getDtEnd(event.getStartDate(), event.getDuration(),
 				event.isAllday());
 		if (dtEnd != null) {
 			prop.add(dtEnd);
@@ -872,7 +872,7 @@ public class Ical4jHelper {
 	}
 
 	private void appendDtStartToICS(PropertyList prop, Event event) {
-		prop.add(getDtStart(event.getDate(), event.isAllday()));
+		prop.add(getDtStart(event.getStartDate(), event.isAllday()));
 	}
 
 	private void appendCategoryToICS(PropertyList prop, Event event) {
@@ -925,7 +925,7 @@ public class Ical4jHelper {
 
 	public Date isInIntervalDate(Event event, Date start, Date end,
 			Set<Date> dateExce) {
-		return isInIntervalDate(event.getRecurrence(), event.getDate(), start,
+		return isInIntervalDate(event.getRecurrence(), event.getStartDate(), start,
 				end, dateExce);
 	}
 
@@ -1188,12 +1188,12 @@ public class Ical4jHelper {
 					if (wdl.size() > 0) {
 						er.setKind(RecurrenceKind.monthlybyday);
 						GregorianCalendar cal = new GregorianCalendar();
-						cal.setTime(event.getDate());
+						cal.setTime(event.getStartDate());
 						cal.set(GregorianCalendar.WEEK_OF_MONTH,
 								((WeekDay) wdl.get(0)).getOffset());
 						cal.set(GregorianCalendar.DAY_OF_WEEK,
 								WeekDay.getCalendarDay((WeekDay) wdl.get(0)));
-						event.setDate(cal.getTime());
+						event.setStartDate(cal.getTime());
 					} else {
 						er.setKind(RecurrenceKind.monthlybydate);
 					}
@@ -1318,7 +1318,7 @@ public class Ical4jHelper {
 
 				boolean find = false;
 				for (Event excp : event.getRecurrence().getEventExceptions()) {
-					if (excp.getDate().equals(d)) {
+					if (excp.getStartDate().equals(d)) {
 						find = true;
 						break;
 					}
@@ -1499,7 +1499,7 @@ public class Ical4jHelper {
 
 	/* package */ RRule getRRule(Event event) {
 		RRule rrule = null;
-		Recur recur = getRecur(event.getRecurrence(), event.getDate());
+		Recur recur = getRecur(event.getRecurrence(), event.getStartDate());
 		if (recur != null) {
 			rrule = new RRule(recur);
 		}
