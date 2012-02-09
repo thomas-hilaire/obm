@@ -139,6 +139,9 @@ public class TaskConverter {
 		case yearly:
 			r.setType(RecurrenceType.YEARLY);
 			break;
+		case yearlybyday:
+			r.setType(RecurrenceType.YEARLY_NDAY);
+			break;
 		case none:
 			r.setType(null);
 			break;
