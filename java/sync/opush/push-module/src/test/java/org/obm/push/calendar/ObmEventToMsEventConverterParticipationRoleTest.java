@@ -29,23 +29,52 @@
  * OBM connectors. 
  * 
  * ***** END LICENSE BLOCK ***** */
-package org.obm.push.exception;
+package org.obm.push.calendar;
 
-public class MSObjectException extends Exception {
+import static org.fest.assertions.Assertions.assertThat;
 
-	public MSObjectException() {
-		super();
+import org.junit.Before;
+import org.junit.Test;
+import org.obm.push.bean.AttendeeType;
+import org.obm.push.calendar.ObmEventToMSEventConverterImpl;
+import org.obm.sync.calendar.ParticipationRole;
+
+public class ObmEventToMsEventConverterParticipationRoleTest {
+
+	private ObmEventToMSEventConverterImpl converter;
+
+	@Before
+	public void setUp() {
+		converter = new ObmEventToMSEventConverterImpl();
 	}
 
-	public MSObjectException(String message, Throwable cause) {
-		super(message, cause);
+	@Test(expected=NullPointerException.class)
+	public void testNullParticipationRole() {
+		converter.participationRole(null);
 	}
 
-	public MSObjectException(String message) {
-		super(message);
+	@Test
+	public void testChairParticipationRole() {
+		AttendeeType role = converter.participationRole(ParticipationRole.CHAIR);
+		assertThat(role).isEqualTo(AttendeeType.REQUIRED);
 	}
 
-	public MSObjectException(Throwable cause) {
-		super(cause);
+	@Test
+	public void testNonParticipationRole() {
+		AttendeeType role = converter.participationRole(ParticipationRole.NON);
+		assertThat(role).isEqualTo(AttendeeType.OPTIONAL);
 	}
+	
+	@Test
+	public void testOptionalParticipationRole() {
+		AttendeeType role = converter.participationRole(ParticipationRole.OPT);
+		assertThat(role).isEqualTo(AttendeeType.OPTIONAL);
+	}
+	
+	@Test
+	public void testRequiredParticipationRole() {
+		AttendeeType role = converter.participationRole(ParticipationRole.REQ);
+		assertThat(role).isEqualTo(AttendeeType.REQUIRED);
+	}
+
 }

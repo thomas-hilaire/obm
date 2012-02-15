@@ -29,7 +29,7 @@
  * OBM connectors. 
  * 
  * ***** END LICENSE BLOCK ***** */
-package org.obm.push.bean;
+package org.obm.push.calendar;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -41,9 +41,13 @@ import org.fest.assertions.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.obm.DateUtils;
-import org.obm.push.MSEventToObmEventConverter;
+import org.obm.push.bean.MSEvent;
+import org.obm.push.bean.MSRecurrence;
+import org.obm.push.bean.RecurrenceDayOfWeek;
+import org.obm.push.bean.RecurrenceType;
+import org.obm.push.bean.User;
+import org.obm.push.exception.ConversionException;
 import org.obm.push.exception.IllegalMSEventRecurrenceException;
-import org.obm.push.exception.IllegalMSEventStateException;
 import org.obm.sync.calendar.Event;
 import org.obm.sync.calendar.EventRecurrence;
 import org.obm.sync.calendar.RecurrenceDay;
@@ -53,20 +57,20 @@ import com.google.common.collect.Sets;
 
 public class MSEventToObmEventConverterRecurrenceTest {
 
-	private MSEventToObmEventConverter converter;
+	private MSEventToObmEventConverterImpl converter;
 
 	private User user;
 	
 	@Before
 	public void setUp() {
-		converter = new MSEventToObmEventConverter();
+		converter = new MSEventToObmEventConverterImpl();
 		String mailbox = "user@domain";
 	    user = User.Factory.create()
 				.createUser(mailbox, mailbox, null);
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeYearlyNeedDayOfMonthAndMonthOfYear() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyNeedDayOfMonthAndMonthOfYear() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY);
 		MSEvent msEventRecurrent = new MSEventBuilder()
@@ -80,7 +84,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeYearlyNeedInterval() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyNeedInterval() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY);
 		recurrence.setDayOfMonth(1);
@@ -96,7 +100,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeYearlyInterval() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyInterval() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY);
 		recurrence.setDayOfMonth(1);
@@ -116,7 +120,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeYearlyIntervalIllegal() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyIntervalIllegal() throws ConversionException {
 		Integer yearlyIntervalShouldBeOne = 2;
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY);
@@ -134,7 +138,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeYearly() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearly() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY);
 		recurrence.setDayOfMonth(1);
@@ -159,7 +163,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeYearlyUntil() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyUntil() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY);
 		recurrence.setDayOfMonth(1);
@@ -180,7 +184,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeYearlyUntilNull() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyUntilNull() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY);
 		recurrence.setDayOfMonth(1);
@@ -201,7 +205,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeYearlyOccurence() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyOccurence() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY);
 		recurrence.setDayOfMonth(1);
@@ -224,7 +228,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeYearlyOccurenceNull() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyOccurenceNull() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY);
 		recurrence.setDayOfMonth(1);
@@ -245,7 +249,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeYearlyUntilAndOccurence() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyUntilAndOccurence() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY);
 		recurrence.setDayOfMonth(1);
@@ -264,7 +268,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeYearlyNDayNeedInterval() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyNDayNeedInterval() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY_NDAY);
 		recurrence.setDayOfMonth(1);
@@ -280,7 +284,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeYearlyNDayInterval() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyNDayInterval() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY_NDAY);
 		recurrence.setDayOfMonth(1);
@@ -300,7 +304,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeYearlyNDayIntervalIllegal() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyNDayIntervalIllegal() throws ConversionException {
 		Integer yearlyIntervalShouldBeOne = 2;
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY_NDAY);
@@ -318,7 +322,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeYearlyNDay() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyNDay() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY_NDAY);
 		recurrence.setDayOfMonth(1);
@@ -343,7 +347,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeYearlyNDayUntil() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyNDayUntil() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY_NDAY);
 		recurrence.setDayOfMonth(1);
@@ -364,7 +368,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeYearlyNDayUntilNull() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyNDayUntilNull() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY_NDAY);
 		recurrence.setDayOfMonth(1);
@@ -385,7 +389,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeYearlyNDayOccurence() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyNDayOccurence() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY_NDAY);
 		recurrence.setDayOfMonth(1);
@@ -408,7 +412,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeYearlyNDayOccurenceNull() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyNDayOccurenceNull() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY_NDAY);
 		recurrence.setDayOfMonth(1);
@@ -429,7 +433,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeYearlyNDayUntilAndOccurence() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeYearlyNDayUntilAndOccurence() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.YEARLY_NDAY);
 		recurrence.setDayOfMonth(1);
@@ -448,7 +452,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeMonthlyNeedInterval() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyNeedInterval() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY);
 		MSEvent msEventRecurrent = new MSEventBuilder()
@@ -462,7 +466,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeMonthlyInterval() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyInterval() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY);
 		recurrence.setInterval(10);
@@ -480,7 +484,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeMonthlyIntervalIllegal() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyIntervalIllegal() throws ConversionException {
 		Integer monthlyIntervalShouldLessThan = 100;
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY);
@@ -496,7 +500,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeMonthly() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthly() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY);
 		recurrence.setInterval(1);
@@ -519,7 +523,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeMonthlyUntilAndOccurence() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyUntilAndOccurence() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY);
 		recurrence.setInterval(1);
@@ -536,7 +540,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeMonthlyUntil() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyUntil() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY);
 		recurrence.setInterval(1);
@@ -555,7 +559,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeMonthlyUntilNull() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyUntilNull() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY);
 		recurrence.setInterval(1);
@@ -574,7 +578,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeMonthlyOccurence() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyOccurence() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY);
 		recurrence.setInterval(1);
@@ -596,7 +600,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeMonthlyOccurenceNull() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyOccurenceNull() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY);
 		recurrence.setInterval(1);
@@ -616,7 +620,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeMonthlyNDayNeedInterval() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyNDayNeedInterval() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY_NDAY);
 		MSEvent msEventRecurrent = new MSEventBuilder()
@@ -630,7 +634,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeMonthlyNDayInterval() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyNDayInterval() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY_NDAY);
 		recurrence.setInterval(15);
@@ -648,7 +652,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeMonthlyNDayIntervalIllegal() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyNDayIntervalIllegal() throws ConversionException {
 		Integer monthlyIntervalShouldLessThan = 100;
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY_NDAY);
@@ -664,7 +668,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeMonthlyNDay() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyNDay() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY_NDAY);
 		recurrence.setInterval(1);
@@ -687,7 +691,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeMonthlyNDayUntilAndOccurence() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyNDayUntilAndOccurence() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY_NDAY);
 		recurrence.setInterval(1);
@@ -704,7 +708,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeMonthlyNDayUntil() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyNDayUntil() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY_NDAY);
 		recurrence.setInterval(1);
@@ -723,7 +727,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeMonthlyNDayUntilNull() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyNDayUntilNull() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY_NDAY);
 		recurrence.setInterval(1);
@@ -742,7 +746,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeMonthlyNDayOccurence() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyNDayOccurence() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY_NDAY);
 		recurrence.setInterval(1);
@@ -764,7 +768,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeMonthlyNDayOccurenceNull() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyNDayOccurenceNull() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY_NDAY);
 		recurrence.setInterval(1);
@@ -784,7 +788,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeMonthlyNDayOnNinthDayEachTwoMonth() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeMonthlyNDayOnNinthDayEachTwoMonth() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.MONTHLY_NDAY);
 		recurrence.setUntil(null);
@@ -808,7 +812,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeWeeklyNeedInterval() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeWeeklyNeedInterval() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.WEEKLY);
 		MSEvent msEventRecurrent = new MSEventBuilder()
@@ -822,7 +826,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeWeeklyInterval() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeWeeklyInterval() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.WEEKLY);
 		recurrence.setInterval(1);
@@ -842,7 +846,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeWeeklyIntervalIllegal() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeWeeklyIntervalIllegal() throws ConversionException {
 		Integer weeklyIntervalShouldLessThan = 100;
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.WEEKLY);
@@ -859,7 +863,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeWeeklyNeedDay() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeWeeklyNeedDay() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.WEEKLY);
 		recurrence.setInterval(1);
@@ -875,7 +879,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeWeekly() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeWeekly() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.WEEKLY);
 		recurrence.setInterval(1);
@@ -899,7 +903,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeWeeklyUntil() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeWeeklyUntil() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.WEEKLY);
 		recurrence.setInterval(1);
@@ -919,7 +923,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeWeeklyUntilNull() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeWeeklyUntilNull() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.WEEKLY);
 		recurrence.setInterval(1);
@@ -939,7 +943,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeWeeklyOccurence() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeWeeklyOccurence() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.WEEKLY);
 		recurrence.setInterval(1);
@@ -961,7 +965,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeWeeklyOccurenceNull() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeWeeklyOccurenceNull() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.WEEKLY);
 		recurrence.setInterval(1);
@@ -981,7 +985,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeWeeklyUntilAndOccurence() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeWeeklyUntilAndOccurence() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.WEEKLY);
 		recurrence.setInterval(1);
@@ -999,7 +1003,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeWeeklyEachTwoMonday() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeWeeklyEachTwoMonday() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.WEEKLY);
 		recurrence.setInterval(2);
@@ -1019,7 +1023,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeWeeklyEachFourFridayAndSundayUntilOneYear() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeWeeklyEachFourFridayAndSundayUntilOneYear() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.WEEKLY);
 		recurrence.setInterval(4);
@@ -1043,7 +1047,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeDailyNeedInterval() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeDailyNeedInterval() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.DAILY);
 		recurrence.setDayOfWeek(Sets.newHashSet(RecurrenceDayOfWeek.FRIDAY));
@@ -1058,7 +1062,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeDailyInterval() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeDailyInterval() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.DAILY);
 		recurrence.setDayOfWeek(Sets.newHashSet(RecurrenceDayOfWeek.FRIDAY));
@@ -1077,7 +1081,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeDailyIntervalIllegal() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeDailyIntervalIllegal() throws ConversionException {
 		Integer dailyIntervalShouldLessThan = 1000;
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.DAILY);
@@ -1093,7 +1097,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeDailyNeedDays() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeDailyNeedDays() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.DAILY);
 		recurrence.setInterval(6);
@@ -1108,7 +1112,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeDaily() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeDaily() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.DAILY);
 		recurrence.setDayOfWeek(EnumSet.of(RecurrenceDayOfWeek.SATURDAY));
@@ -1132,7 +1136,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertAttributeTypeDailyUntil() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeDailyUntil() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.DAILY);
 		recurrence.setDayOfWeek(EnumSet.of(RecurrenceDayOfWeek.SATURDAY));
@@ -1152,7 +1156,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test
-	public void testConvertRecurrenceAttributeTypedDailyUntilNull() throws IllegalMSEventStateException {
+	public void testConvertRecurrenceAttributeTypedDailyUntilNull() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.DAILY);
 		recurrence.setDayOfWeek(EnumSet.of(RecurrenceDayOfWeek.SATURDAY));
@@ -1172,7 +1176,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeDailyOccurence() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeDailyOccurence() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.DAILY);
 		recurrence.setDayOfWeek(EnumSet.of(RecurrenceDayOfWeek.MONDAY));
@@ -1195,7 +1199,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeDailyOccurenceNull() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeDailyOccurenceNull() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.DAILY);
 		recurrence.setDayOfWeek(EnumSet.of(RecurrenceDayOfWeek.MONDAY));
@@ -1216,7 +1220,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 	
 	@Test(expected=IllegalMSEventRecurrenceException.class)
-	public void testConvertAttributeTypeDailyUntilAndOccurence() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeDailyUntilAndOccurence() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.DAILY);
 		recurrence.setDayOfWeek(EnumSet.of(RecurrenceDayOfWeek.MONDAY));
@@ -1234,7 +1238,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeDailyEachWeekDay() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeDailyEachWeekDay() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setInterval(1);
 		recurrence.setType(RecurrenceType.DAILY);
@@ -1266,7 +1270,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 	}
 
 	@Test
-	public void testConvertAttributeTypeDailyEachFiftyWednesdayForThreeYears() throws IllegalMSEventStateException {
+	public void testConvertAttributeTypeDailyEachFiftyWednesdayForThreeYears() throws ConversionException {
 		MSRecurrence recurrence = new MSRecurrence();
 		recurrence.setType(RecurrenceType.DAILY);
 		recurrence.setDayOfWeek(EnumSet.of(RecurrenceDayOfWeek.WEDNESDAY));
@@ -1294,7 +1298,7 @@ public class MSEventToObmEventConverterRecurrenceTest {
 		return instance;
 	}
 
-	private Event convertToOBMEvent(MSEvent msEvent) throws IllegalMSEventStateException {
+	private Event convertToOBMEvent(MSEvent msEvent) throws ConversionException {
 		return converter.convert(user, null, msEvent, false);
 	}
 

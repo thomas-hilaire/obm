@@ -29,37 +29,41 @@
  * OBM connectors. 
  * 
  * ***** END LICENSE BLOCK ***** */
-package org.obm.push;
+package org.obm.push.calendar;
 
-import java.util.List;
+import static org.fest.assertions.Assertions.assertThat;
 
-import org.obm.push.backend.DataDelta;
-import org.obm.push.bean.BackendSession;
-import org.obm.push.bean.FilterType;
-import org.obm.push.bean.ItemChange;
-import org.obm.push.bean.PIMDataType;
-import org.obm.push.bean.SyncState;
-import org.obm.push.exception.ConversionException;
-import org.obm.push.exception.DaoException;
-import org.obm.push.exception.UnexpectedObmSyncServerException;
-import org.obm.push.exception.activesync.CollectionNotFoundException;
-import org.obm.push.exception.activesync.ProcessingEmailException;
+import org.junit.Before;
+import org.junit.Test;
+import org.obm.push.bean.CalendarSensitivity;
+import org.obm.push.calendar.ObmEventToMSEventConverterImpl;
+import org.obm.sync.calendar.EventPrivacy;
 
-public interface IContentsExporter {
+public class ObmEventToMsEventConverterSensitivityTest {
 
-	DataDelta getChanged(BackendSession bs, SyncState state,
-			Integer collectionId, FilterType filterType, PIMDataType dataType)
-			throws DaoException, CollectionNotFoundException,
-			UnexpectedObmSyncServerException, ProcessingEmailException, ConversionException;
+	private ObmEventToMSEventConverterImpl converter;
 
-	List<ItemChange> fetch(BackendSession bs, List<String> itemIds,
-			PIMDataType dataType) throws CollectionNotFoundException,
-			DaoException, ProcessingEmailException,
-			UnexpectedObmSyncServerException, ConversionException;
+	@Before
+	public void setUp() {
+		converter = new ObmEventToMSEventConverterImpl();
+	}
 
-	int getItemEstimateSize(BackendSession bs, SyncState state,
-			Integer collectionId, FilterType filterType, PIMDataType dataType)
-			throws CollectionNotFoundException, ProcessingEmailException,
-			DaoException, UnexpectedObmSyncServerException, ConversionException;
+	@Test(expected=NullPointerException.class)
+	public void testNullConversion() {
+		converter.sensitivity(null);
+	}
+
+	
+	@Test
+	public void testPublicConversion() {
+		CalendarSensitivity sensitivity = converter.sensitivity(EventPrivacy.PUBLIC);
+		assertThat(sensitivity).isEqualTo(CalendarSensitivity.NORMAL);
+	}
+
+	@Test
+	public void testPrivateConversion() {
+		CalendarSensitivity sensitivity = converter.sensitivity(EventPrivacy.PRIVATE);
+		assertThat(sensitivity).isEqualTo(CalendarSensitivity.PRIVATE);
+	}
 
 }

@@ -45,13 +45,13 @@ import org.obm.push.bean.MeetingResponse;
 import org.obm.push.bean.MeetingResponseStatus;
 import org.obm.push.bean.PIMDataType;
 import org.obm.push.calendar.CalendarBackend;
+import org.obm.push.exception.ConversionException;
 import org.obm.push.exception.DaoException;
-import org.obm.push.exception.IllegalMSEventStateException;
 import org.obm.push.exception.UnexpectedObmSyncServerException;
 import org.obm.push.exception.activesync.CollectionNotFoundException;
+import org.obm.push.exception.activesync.ItemNotFoundException;
 import org.obm.push.exception.activesync.NoDocumentException;
 import org.obm.push.exception.activesync.ProcessingEmailException;
-import org.obm.push.exception.activesync.ItemNotFoundException;
 import org.obm.push.impl.Responder;
 import org.obm.push.mail.MailBackend;
 import org.obm.push.protocol.MeetingProtocol;
@@ -124,7 +124,7 @@ public class MeetingResponseHandler extends WbxmlRequestHandler {
 		} catch (ProcessingEmailException e) {
 			logger.error(e.getMessage(), e);
 			sendErrorResponse(responder, MeetingResponseStatus.SERVER_ERROR);
-		} catch (IllegalMSEventStateException e) {
+		} catch (ConversionException e) {
 			sendErrorResponse(responder, MeetingResponseStatus.SERVER_ERROR);
 		}
 	}
@@ -138,7 +138,7 @@ public class MeetingResponseHandler extends WbxmlRequestHandler {
 	}
 
 	private MeetingHandlerResponse doTheJob(MeetingHandlerRequest meetingRequest, BackendSession bs) 
-			throws DaoException, CollectionNotFoundException, ProcessingEmailException, IllegalMSEventStateException {
+			throws DaoException, CollectionNotFoundException, ProcessingEmailException, ConversionException {
 		
 		List<ItemChangeMeetingResponse> meetingResponses =  new ArrayList<ItemChangeMeetingResponse>();
 		for (MeetingResponse item : meetingRequest.getMeetingResponses()) {
@@ -149,7 +149,7 @@ public class MeetingResponseHandler extends WbxmlRequestHandler {
 	}
 
 	private ItemChangeMeetingResponse handleSingleResponse(BackendSession bs, MeetingResponse item) throws DaoException,
-			CollectionNotFoundException, ProcessingEmailException, IllegalMSEventStateException {
+			CollectionNotFoundException, ProcessingEmailException, ConversionException {
 		
 		MSEmail email = retrieveMailWithMeetingRequest(bs, item);
 	

@@ -29,51 +29,58 @@
  * OBM connectors. 
  * 
  * ***** END LICENSE BLOCK ***** */
-package org.obm.push;
+package org.obm.push.calendar;
 
-import static org.fest.assertions.Assertions.assertThat;
+import java.io.IOException;
+import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.obm.push.bean.AttendeeType;
-import org.obm.sync.calendar.ParticipationRole;
+import net.fortuna.ical4j.data.ParserException;
 
-public class ObmEventToMsEventConverterParticipationRoleTest {
+import org.obm.icalendar.Ical4jHelper;
+import org.obm.icalendar.Ical4jUser;
+import org.obm.push.bean.MSEvent;
+import org.obm.push.bean.MSEventUid;
+import org.obm.push.bean.User;
+import org.obm.push.exception.ConversionException;
+import org.obm.sync.calendar.Event;
 
-	private ObmEventToMsEventConverter converter;
+import com.google.common.collect.Iterables;
 
-	@Before
-	public void setUp() {
-		converter = new ObmEventToMsEventConverter();
-	}
+import fr.aliacom.obm.common.domain.ObmDomain;
 
-	@Test(expected=NullPointerException.class)
-	public void testNullParticipationRole() {
-		converter.participationRole(null);
-	}
+public class ObmEventToMSEventByICSLoopConverter implements ObmEventToMSEventConverter {
 
-	@Test
-	public void testChairParticipationRole() {
-		AttendeeType role = converter.participationRole(ParticipationRole.CHAIR);
-		assertThat(role).isEqualTo(AttendeeType.REQUIRED);
-	}
 
-	@Test
-	public void testNonParticipationRole() {
-		AttendeeType role = converter.participationRole(ParticipationRole.NON);
-		assertThat(role).isEqualTo(AttendeeType.OPTIONAL);
+	private Ical4jHelper ical4j;
+	private ObmEventToMSEventConverter obmEventToMSEventConverter;
+	
+	public ObmEventToMSEventByICSLoopConverter() {
+		ical4j = new Ical4jHelper();
+		obmEventToMSEventConverter = new ObmEventToMSEventConverterImpl();
 	}
 	
-	@Test
-	public void testOptionalParticipationRole() {
-		AttendeeType role = converter.participationRole(ParticipationRole.OPT);
-		assertThat(role).isEqualTo(AttendeeType.OPTIONAL);
+	@Override
+	public MSEvent convert(Event eventToConvert, MSEventUid uid, User user) throws ConversionException {
+				
+		try {
+			Ical4jUser ical4jUser = convertIcal4jUser(user);
+			String eventAsICS = ical4j.parseEvent(eventToConvert, ical4jUser);
+			List<Event> eventsFromICS = ical4j.parseICSEvent(eventAsICS, ical4jUser);
+			Event eventFromICS = Iterables.getOnlyElement(eventsFromICS);
+			return obmEventToMSEventConverter.convert(eventFromICS, uid, user);
+		} catch (ParserException e) {
+			throw new ConversionException(e);
+		} catch (IOException e) {
+			throw new ConversionException(e);
+		}
 	}
-	
-	@Test
-	public void testRequiredParticipationRole() {
-		AttendeeType role = converter.participationRole(ParticipationRole.REQ);
-		assertThat(role).isEqualTo(AttendeeType.REQUIRED);
+
+	private Ical4jUser convertIcal4jUser(User user) {
+		ObmDomain obmDomain = new ObmDomain();
+		obmDomain.setId(1);
+		obmDomain.setName(user.getDomain());
+		obmDomain.setUuid("83bff451-11b7-8f55-d06b-7013cb8a0531");
+		return Ical4jUser.Factory.create().createIcal4jUser(user.getLoginAtDomain(), obmDomain);
 	}
 
 }
