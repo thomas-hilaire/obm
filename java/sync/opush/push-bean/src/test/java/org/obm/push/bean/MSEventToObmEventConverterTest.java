@@ -3,7 +3,6 @@ package org.obm.push.bean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 
 import org.fest.assertions.Assertions;
@@ -794,65 +793,6 @@ public class MSEventToObmEventConverterTest {
 		Date midnightOfDay = org.obm.push.utils.DateUtils.getMidnightOfDayEarly(msEvent.getStartTime());
 		Assertions.assertThat(converted.getStartDate()).isEqualTo(midnightOfDay);
 		Assertions.assertThat(converted.getDuration()).isEqualTo(Ints.checkedCast(getOneDayInSecond()));
-	}
-	
-	@Test
-	public void testConvertExceptionAttributeDeletedTrue() throws IllegalMSEventStateException {
-		MSEventException msEventException = new MSEventException();
-		msEventException.setStartTime(date("2004-12-11T11:15:10Z"));
-		msEventException.setEndTime(date("2004-12-12T11:15:10Z"));
-		msEventException.setExceptionStartTime(date("2004-10-11T11:15:10Z"));
-		msEventException.setDeleted(true);
-		msEventException.setSubject("Any Subject");
-		
-		MSEvent msEvent = new MSEventBuilder()
-				.withStartTime(date("2004-12-11T11:15:10Z"))
-				.withEndTime(date("2004-12-12T11:15:10Z"))
-				.withSubject("Any Subject")
-				.withRecurrence(simpleRecurrence(RecurrenceType.DAILY))
-				.withExceptions(Lists.newArrayList(msEventException))
-				.build();
-		
-		Event convertedEvent = convertToOBMEvent(msEvent);
-
-		Date[] exceptions = convertedEvent.getRecurrence().getExceptions();
-		List<Event> eventExceptions = convertedEvent.getRecurrence().getEventExceptions();
-		Assertions.assertThat(exceptions).hasSize(1);
-		Assertions.assertThat(exceptions).containsOnly(msEventException.getExceptionStartTime());
-		Assertions.assertThat(eventExceptions).isEmpty();
-	}
-
-	@Test
-	public void testConvertExceptionAttributeDeletedFalse() throws IllegalMSEventStateException {
-		MSEventException msEventException = new MSEventException();
-		msEventException.setStartTime(date("2004-12-11T11:15:10Z"));
-		msEventException.setEndTime(date("2004-12-12T11:15:10Z"));
-		msEventException.setExceptionStartTime(date("2004-10-11T11:15:10Z"));
-		msEventException.setDeleted(false);
-		msEventException.setSubject("Any Subject");
-		
-		MSEvent msEvent = new MSEventBuilder()
-				.withStartTime(date("2004-12-11T11:15:10Z"))
-				.withEndTime(date("2004-12-12T11:15:10Z"))
-				.withSubject("Any Subject")
-				.withRecurrence(simpleRecurrence(RecurrenceType.DAILY))
-				.withExceptions(Lists.newArrayList(msEventException))
-				.build();
-		
-		Event convertedEvent = convertToOBMEvent(msEvent);
-		
-		Date[] exceptions = convertedEvent.getRecurrence().getExceptions();
-		List<Event> eventExceptions = convertedEvent.getRecurrence().getEventExceptions();
-		Assertions.assertThat(exceptions).isEmpty();
-		Assertions.assertThat(eventExceptions).hasSize(1);
-		Assertions.assertThat(eventExceptions.get(0).getRecurrenceId()).isEqualTo(msEventException.getExceptionStartTime());
-	}
-
-	private MSRecurrence simpleRecurrence(RecurrenceType type) {
-		MSRecurrence recurrence = new MSRecurrence();
-		recurrence.setInterval(1);
-		recurrence.setType(type);
-		return recurrence;
 	}
 
 	private Event convertToOBMEvent(MSEvent msEvent) throws IllegalMSEventStateException {
