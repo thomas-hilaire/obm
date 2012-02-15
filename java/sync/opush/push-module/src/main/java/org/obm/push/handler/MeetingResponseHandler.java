@@ -46,6 +46,7 @@ import org.obm.push.bean.MeetingResponseStatus;
 import org.obm.push.bean.PIMDataType;
 import org.obm.push.calendar.CalendarBackend;
 import org.obm.push.exception.DaoException;
+import org.obm.push.exception.IllegalMSEventStateException;
 import org.obm.push.exception.UnexpectedObmSyncServerException;
 import org.obm.push.exception.activesync.CollectionNotFoundException;
 import org.obm.push.exception.activesync.NoDocumentException;
@@ -123,6 +124,8 @@ public class MeetingResponseHandler extends WbxmlRequestHandler {
 		} catch (ProcessingEmailException e) {
 			logger.error(e.getMessage(), e);
 			sendErrorResponse(responder, MeetingResponseStatus.SERVER_ERROR);
+		} catch (IllegalMSEventStateException e) {
+			sendErrorResponse(responder, MeetingResponseStatus.SERVER_ERROR);
 		}
 	}
 	
@@ -135,7 +138,7 @@ public class MeetingResponseHandler extends WbxmlRequestHandler {
 	}
 
 	private MeetingHandlerResponse doTheJob(MeetingHandlerRequest meetingRequest, BackendSession bs) 
-			throws DaoException, CollectionNotFoundException, ProcessingEmailException {
+			throws DaoException, CollectionNotFoundException, ProcessingEmailException, IllegalMSEventStateException {
 		
 		List<ItemChangeMeetingResponse> meetingResponses =  new ArrayList<ItemChangeMeetingResponse>();
 		for (MeetingResponse item : meetingRequest.getMeetingResponses()) {
@@ -146,7 +149,7 @@ public class MeetingResponseHandler extends WbxmlRequestHandler {
 	}
 
 	private ItemChangeMeetingResponse handleSingleResponse(BackendSession bs, MeetingResponse item) throws DaoException,
-			CollectionNotFoundException, ProcessingEmailException {
+			CollectionNotFoundException, ProcessingEmailException, IllegalMSEventStateException {
 		
 		MSEmail email = retrieveMailWithMeetingRequest(bs, item);
 	

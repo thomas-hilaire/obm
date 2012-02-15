@@ -48,6 +48,8 @@ import org.obm.push.bean.MSEventException;
 import org.obm.push.bean.MSRecurrence;
 import org.obm.push.bean.RecurrenceDayOfWeek;
 import org.obm.push.calendar.EventConverter;
+import org.obm.push.exception.IllegalMSEventExceptionStateException;
+import org.obm.push.exception.IllegalMSEventStateException;
 import org.obm.sync.calendar.Attendee;
 import org.obm.sync.calendar.Event;
 import org.obm.sync.calendar.EventExtId;
@@ -71,7 +73,8 @@ public class MSEventToObmEventConverter {
 	private static final int EVENT_ALLDAY_DURATION_IN_MS = 24 * 3600;
 	private static final int EVENT_CATEGORIES_MAX = 300;
 
-	public Event convert(BackendSession bs, Event oldEvent, MSEvent event, Boolean isObmInternalEvent) {
+	public Event convert(BackendSession bs, Event oldEvent, MSEvent event, Boolean isObmInternalEvent) 
+			throws org.obm.push.exception.IllegalMSEventStateException {
 		EventExtId extId = event.getExtId();
 		EventObmId obmId = event.getObmId();
 		
@@ -88,6 +91,7 @@ public class MSEventToObmEventConverter {
 			e.setRecurrence(r);
 			if (event.getExceptions() != null && !event.getExceptions().isEmpty()) {
 				for (MSEventException excep : event.getExceptions()) {
+					assertExceptionValidity(excep);
 					if (excep.isDeleted()) {
 						r.addException(excep.getExceptionStartTime());
 					} else {
@@ -105,7 +109,7 @@ public class MSEventToObmEventConverter {
 	}
 
 	private void fillEventCommonProperties(BackendSession bs, Event converted, Event oldEvent, Event parentEvent, 
-			MSEventCommon data, boolean isObmInternalEvent) {
+			MSEventCommon data, boolean isObmInternalEvent) throws org.obm.push.exception.IllegalMSEventStateException {
 		
 		defineOwner(bs, converted, oldEvent);
 		converted.setInternalEvent(isObmInternalEvent);
@@ -148,7 +152,9 @@ public class MSEventToObmEventConverter {
 	// Exceptions.Exception.Body (section 2.2.3.9): This element is optional.
 	// Exceptions.Exception.Categories (section 2.2.3.8): This element is
 	// optional.
-	private Event convertEventOne(BackendSession bs, Event oldEvent, Event parentEvent, MSEvent data, boolean isObmInternalEvent) {
+	private Event convertEventOne(BackendSession bs, Event oldEvent, Event parentEvent, MSEvent data, boolean isObmInternalEvent) 
+			throws org.obm.push.exception.IllegalMSEventStateException {
+		
 		Event e = new Event();
 		fillEventCommonProperties(bs, e, oldEvent, null, data, isObmInternalEvent);
 		e.setAttendees( getAttendees(oldEvent, parentEvent, data) );
@@ -160,7 +166,7 @@ public class MSEventToObmEventConverter {
 	// Exceptions.Exception.Categories (section 2.2.3.8): This element is
 	// optional.
 	private Event convertEventException(BackendSession bs, Event oldEvent, Event parentEvent, 
-			MSEventException data, boolean isObmInternalEvent) {
+			MSEventException data, boolean isObmInternalEvent) throws org.obm.push.exception.IllegalMSEventStateException {
 		
 		Event e = new Event();
 		fillEventCommonProperties(bs, e, oldEvent, parentEvent, data, isObmInternalEvent);
@@ -380,7 +386,7 @@ public class MSEventToObmEventConverter {
 		}
 	}
 	
-	private void convertCategories(MSEventCommon from, Event to) {
+	private void convertCategories(MSEventCommon from, Event to) throws org.obm.push.exception.IllegalMSEventStateException {
 		if (eventHasCategories(from)) {
 			checkEventCategoriesValidity(from);
 			to.setCategory(Iterables.getFirst(from.getCategories(), null));
@@ -389,11 +395,11 @@ public class MSEventToObmEventConverter {
 		}
 	}
 
-	private void checkEventCategoriesValidity(MSEventCommon event) {
+	private void checkEventCategoriesValidity(MSEventCommon event) throws IllegalMSEventStateException {
 		if (event.getCategories().size() > EVENT_CATEGORIES_MAX) {
 			String msg = String.format("Categories MUST NOT contain more than 300 elements, found:%d",
 					event.getCategories().size());
-			throw new IllegalArgumentException(msg);
+			throw new IllegalMSEventStateException(msg);
 		}
 	}
 
@@ -422,5 +428,11 @@ public class MSEventToObmEventConverter {
 		
 		int duration = (int) (data.getEndTime().getTime() - data.getStartTime().getTime()) / 1000;
 		converted.setDuration(duration);
+	}
+
+	private void assertExceptionValidity(MSEventException exception) throws IllegalMSEventExceptionStateException {
+		if (exception.getExceptionStartTime() == null) {
+			throw new IllegalMSEventExceptionStateException("Exceptions.Exception.ExceptionStartTime is required");
+		}
 	}
 }
