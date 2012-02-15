@@ -196,17 +196,6 @@ public class MSEventToObmEventConverter {
 		return ret;
 	}
 	
-	private void defineOrganizer(Event e, MSEvent data, BackendSession bs) {
-		if (e.findOrganizer() == null) {
-			if (data.getOrganizerEmail() != null) {
-				Attendee attendee = getOrganizer(data.getOrganizerEmail(), data.getOrganizerName());
-				e.getAttendees().add(attendee);
-			} else {
-				e.getAttendees().add( getOrganizer(bs.getCredentials().getUser().getEmail(), null) );
-			}	
-		}
-	}
-	
 	private Attendee convertAttendee(Event oldEvent, MSEvent event, MSAttendee at) {
 		Attendee ret = new Attendee();
 		ret.setEmail(at.getEmail());
@@ -379,6 +368,17 @@ public class MSEventToObmEventConverter {
 		return sb.toString();
 	}
 	
+	private void defineOrganizer(Event e, MSEvent data, BackendSession bs) {
+		if (e.findOrganizer() == null) {
+			if (data.getOrganizerEmail() != null) {
+				Attendee attendee = getOrganizer(data.getOrganizerEmail(), data.getOrganizerName());
+				e.getAttendees().add(attendee);
+			} else {
+				e.getAttendees().add( getOrganizer(bs.getCredentials().getUser().getEmail(), data.getOrganizerName()) );
+			}	
+		}
+	}
+
 	private void convertTimeZone(MSEvent from, Event to) {
 		if (from.getTimeZone() != null) {
 			to.setTimezoneName(from.getTimeZone().getID());
