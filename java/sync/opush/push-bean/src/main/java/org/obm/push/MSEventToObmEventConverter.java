@@ -296,7 +296,7 @@ public class MSEventToObmEventConverter {
 		switch (pr.getType()) {
 		case DAILY:
 			or.setKind(RecurrenceKind.daily);
-			or.setDays(getDays(pr.getDayOfWeek()));
+			or.setDays(getDaysOrExceptionIfNot(pr.getDayOfWeek()));
 			multiply = Calendar.DAY_OF_MONTH;
 			break;
 		case MONTHLY:
