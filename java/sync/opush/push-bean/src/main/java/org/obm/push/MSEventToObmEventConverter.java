@@ -75,6 +75,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class MSEventToObmEventConverter {
 
+	private static final String NODAYS = "0000000";
 	private static final int EVENT_ALLDAY_DURATION_IN_MS = 24 * 3600;
 	private static final int EVENT_CATEGORIES_MAX = 300;
 
@@ -308,7 +309,7 @@ public class MSEventToObmEventConverter {
 			break;
 		case WEEKLY:
 			or.setKind(RecurrenceKind.weekly);
-			or.setDays(getDays(pr.getDayOfWeek()));
+			or.setDays(getDaysOrExceptionIfNot(pr.getDayOfWeek()));
 			multiply = Calendar.WEEK_OF_YEAR;
 			break;
 		case YEARLY:
@@ -349,6 +350,15 @@ public class MSEventToObmEventConverter {
 		return or;
 	}
 	
+	private String getDaysOrExceptionIfNot(Set<RecurrenceDayOfWeek> days) throws IllegalMSEventRecurrenceException {
+		String daysAsString = getDays(days);
+		if (!daysAsString.equals(NODAYS)) {
+			return daysAsString;
+		} else {
+			throw new IllegalMSEventRecurrenceException("No recurrent days found");
+		}
+	}
+
 	private void convertRecurrenceInterval(MSRecurrence from, EventRecurrence to) throws IllegalMSEventRecurrenceException {
 		Integer interval = from.getInterval();
 		from.getType().validIntervalOrException(interval);
@@ -358,7 +368,7 @@ public class MSEventToObmEventConverter {
 	private String getDays(Set<RecurrenceDayOfWeek> dayOfWeek) {
 		StringBuilder sb = new StringBuilder();
 		if (dayOfWeek == null) {
-			return "0000000";
+			return NODAYS;
 		}
 		if (dayOfWeek.contains(RecurrenceDayOfWeek.SUNDAY)) {
 			sb.append(1);
