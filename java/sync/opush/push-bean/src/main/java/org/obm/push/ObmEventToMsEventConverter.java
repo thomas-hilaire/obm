@@ -64,6 +64,8 @@ import org.obm.sync.calendar.RecurrenceKind;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.base.Objects;
+
 
 public class ObmEventToMsEventConverter {
 
@@ -80,8 +82,7 @@ public class ObmEventToMsEventConverter {
 		mse.setExtId(e.getExtId());
 		mse.setObmId(e.getObmId());
 		mse.setObmSequence(e.getSequence());
-		appendCreatedLastUpdate(mse, e);
-
+		appendDtStamp(mse, e);
 		return mse;
 	}
 
@@ -160,10 +161,8 @@ public class ObmEventToMsEventConverter {
 		mse.setOrganizerEmail(at.getEmail());		
 	}
 
-	private void appendCreatedLastUpdate(MSEvent mse, Event e) {
-		mse.setCreated(e.getTimeCreate() != null ? e.getTimeCreate() : new Date());
-		mse.setLastUpdate(e.getTimeUpdate() != null ? e.getTimeUpdate() : new Date());
-		mse.setDtStamp(mse.getLastUpdate());
+	private void appendDtStamp(MSEvent mse, Event e) {
+		mse.setDtStamp(Objects.firstNonNull(e.getTimeUpdate(), new Date()));
 	}
 
 	@VisibleForTesting CalendarSensitivity sensitivity(EventPrivacy privacy) {

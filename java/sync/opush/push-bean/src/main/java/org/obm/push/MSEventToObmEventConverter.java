@@ -126,6 +126,7 @@ public class MSEventToObmEventConverter {
 		
 		converted.setLocation(data.getLocation());
 		converted.setStartDate(data.getStartTime());
+		convertDtStamp(data, converted, oldEvent);
 		
 		convertDurationAttribute(data, converted);
 		convertAllDayAttribute(data, converted);
@@ -257,6 +258,16 @@ public class MSEventToObmEventConverter {
 			return EventPrivacy.PUBLIC;
 		}
 
+	}
+
+	private void convertDtStamp(MSEventCommon data, Event converted, Event oldEvent) {
+		converted.setTimeUpdate(data.getDtStamp());
+		if (oldEvent != null) {
+			converted.setTimeCreate(oldEvent.getTimeCreate());
+		}
+		if (converted.getTimeCreate()==null) {
+			converted.setTimeCreate(data.getDtStamp());
+		}
 	}
 
 	private EventRecurrence getRecurrence(MSEvent msev) {
