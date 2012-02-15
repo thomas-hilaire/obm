@@ -54,6 +54,7 @@ public class Event implements Indexed<Integer> {
 	private EventObmId uid;
 	private EventExtId extId;
 	private EventPrivacy privacy;
+	private EventMeetingStatus meetingStatus;
 	private String owner;
 	private String ownerDisplayName;
 	private String ownerEmail;
@@ -267,6 +268,14 @@ public class Event implements Indexed<Integer> {
 
 	public void setTimeUpdate(Date timeUpdate) {
 		this.timeUpdate = timeUpdate;
+	}
+
+	public EventMeetingStatus getMeetingStatus() {
+		return meetingStatus;
+	}
+
+	public void setMeetingStatus(EventMeetingStatus meetingStatus) {
+		this.meetingStatus = meetingStatus;
 	}
 
 	public Event clone() {
@@ -521,7 +530,7 @@ public class Event implements Indexed<Integer> {
 				ownerDisplayName, ownerEmail, creatorDisplayName, creatorEmail, location,
 				startDate, duration, alert, category, priority, allday, attendees, recurrence, type,
 				completion, percent, opacity, entityId, timeUpdate, timeCreate, timezoneName,
-				recurrenceId, internalEvent, sequence);
+				recurrenceId, internalEvent, sequence, meetingStatus);
 	}
 	
 	@Override
@@ -533,6 +542,7 @@ public class Event implements Indexed<Integer> {
 				&& Objects.equal(this.uid, that.uid)
 				&& Objects.equal(this.extId, that.extId)
 				&& Objects.equal(this.privacy, that.privacy)
+				&& Objects.equal(this.meetingStatus, that.meetingStatus)
 				&& Objects.equal(this.owner, that.owner)
 				&& Objects.equal(this.ownerDisplayName, that.ownerDisplayName)
 				&& Objects.equal(this.ownerEmail, that.ownerEmail)
