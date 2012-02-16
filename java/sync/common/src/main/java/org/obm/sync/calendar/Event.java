@@ -37,7 +37,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.obm.push.utils.DateUtils;
 import org.obm.push.utils.index.Indexed;
 
 import com.google.common.base.Objects;
@@ -353,8 +352,6 @@ public class Event implements Indexed<Integer> {
 	public Date getEndDate() {
 		if (getStartDate() == null) {
 			return null;
-		} else if (allday){
-			return DateUtils.getMidnightOfDayLate(getStartDate());
 		} else {
 			return getEndDateByDuration();
 		}
