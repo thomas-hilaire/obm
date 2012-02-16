@@ -32,7 +32,6 @@
 package org.obm.sync.calendar;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.EnumSet;
@@ -46,12 +45,12 @@ import com.google.common.base.Equivalence;
 import com.google.common.base.Equivalence.Wrapper;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
-import com.google.common.base.Preconditions;
 
 public class EventRecurrence {
 
@@ -116,8 +115,8 @@ public class EventRecurrence {
 		return exceptions;
 	}
 
-	public void setExceptions(Date[] exceptions) {
-		this.exceptions = Arrays.asList(exceptions);
+	public void setExceptions(List<Date> exceptions) {
+		this.exceptions = exceptions;
 	}
 
 	public void addException(Date d) {
@@ -145,7 +144,7 @@ public class EventRecurrence {
 			eventExceptions.add(event.clone());
 		}
 		eventRecurrence.setEventExceptions(eventExceptions);
-		eventRecurrence.setExceptions(getExceptions());
+		eventRecurrence.setExceptions(exceptions);
 		eventRecurrence.setFrequence(this.frequence);
 		eventRecurrence.setKind(this.kind);
 		return eventRecurrence;
@@ -255,6 +254,32 @@ public class EventRecurrence {
 		eventExceptions = eventExceptionsCopy;
 	}
 
+	public boolean hasAnyExceptionAtDate(Date exceptionDateToFind) {
+		return hasEventExceptionAtDate(exceptionDateToFind) ||
+				hasDeletedExceptionAtDate(exceptionDateToFind);
+	}
+
+	private boolean hasEventExceptionAtDate(Date exceptionDateToFind) {
+		for (Event eventException : eventExceptions) {
+			if (eventException.getRecurrenceId().equals(exceptionDateToFind)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean hasDeletedExceptionAtDate(Date exceptionDateToFind) {
+		return exceptions.contains(exceptionDateToFind);
+	}
+
+	public boolean hasException() {
+		return exceptions != null && !exceptions.isEmpty();
+	}
+	
+	public boolean hasEventException() {
+		return eventExceptions != null && !eventExceptions.isEmpty();
+	}
+	
 	public boolean frequencyIsSpecified() {
 		return frequence != UNSPECIFIED_FREQUENCY_VALUE;
 	}
@@ -278,5 +303,4 @@ public class EventRecurrence {
 		}
 		return false;
 	}
-
 }

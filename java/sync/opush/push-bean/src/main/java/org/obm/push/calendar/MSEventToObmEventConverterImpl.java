@@ -103,7 +103,7 @@ public class MSEventToObmEventConverterImpl implements MSEventToObmEventConverte
 			e.setRecurrence(r);
 			if (event.getExceptions() != null && !event.getExceptions().isEmpty()) {
 				for (MSEventException excep : event.getExceptions()) {
-					assertExceptionValidity(excep);
+					assertExceptionValidity(r, excep);
 					if (excep.isDeleted()) {
 						r.addException(excep.getExceptionStartTime());
 					} else {
@@ -612,10 +612,19 @@ public class MSEventToObmEventConverterImpl implements MSEventToObmEventConverte
 		return Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	}
 
-	private void assertExceptionValidity(MSEventException exception) throws IllegalMSEventExceptionStateException {
+	private void assertExceptionValidity(EventRecurrence recurrence, MSEventException exception)
+			throws IllegalMSEventExceptionStateException {
+		assertExceptionDoesntExistInRecurrence(recurrence, exception);
 		assertExceptionStartTime(exception);
 		assertExceptionDtStamp(exception);
 		assertExceptionMeetingStatus(exception);
+	}
+
+	private void assertExceptionDoesntExistInRecurrence(EventRecurrence recurrence, MSEventException exception)
+			throws IllegalMSEventExceptionStateException {
+		if (recurrence.hasAnyExceptionAtDate(exception.getExceptionStartTime())) {
+			throw new IllegalMSEventExceptionStateException("Try to add an already existing exception date");
+		}
 	}
 
 	private void assertExceptionMeetingStatus(MSEventException exception) throws IllegalMSEventExceptionStateException {

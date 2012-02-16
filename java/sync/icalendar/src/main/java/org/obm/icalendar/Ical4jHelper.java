@@ -37,7 +37,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -313,9 +312,7 @@ public class Ical4jHelper {
 			Event parentEvent = mapEvents.get(entry.getKey());
 			Collection<Event> eventsException = entry.getValue();
 			if (parentEvent != null) {
-				EventRecurrence parentEventRecurrence = parentEvent
-						.getRecurrence();
-				parentEventRecurrence.getEventExceptions().addAll(eventsException);
+				addOrReplaceExceptions(parentEvent.getRecurrence(), eventsException);
 			} else {
 				logger.warn(
 						"Drop following events exception while parsing ICS file because parent was not defined: {}",
@@ -324,6 +321,13 @@ public class Ical4jHelper {
 		}
 	}
 
+	private void addOrReplaceExceptions(EventRecurrence recurrenceTarget, Collection<Event> eventsToAdd) {
+		for (Event eventToAdd : eventsToAdd) {
+			recurrenceTarget.getListExceptions().remove(eventToAdd.getRecurrenceId());
+		}
+		recurrenceTarget.getEventExceptions().addAll(eventsToAdd);
+	}
+	
 	/* package */ Event convertVEventToEvent(Ical4jUser ical4jUser, VEvent vEvent) {
 		Event event = new Event();
 		event.setType(EventType.VEVENT);
@@ -809,9 +813,9 @@ public class Ical4jHelper {
 	}
 
 	private void appendExDateToICS(PropertyList prop, Event event) {
-		Set<Property> exdates = getExDate(event);
-		for (Property exdate : exdates) {
-			prop.add(exdate);
+		ExDate exDate = getExDate(event);
+		if (exDate != null) {
+			prop.add(exDate);
 		}
 	}
 
@@ -1339,62 +1343,34 @@ public class Ical4jHelper {
 		return calendar;
 	}
 
-	/* package */ Set<Property> getExDate(Event event) {
-		Set<Property> ret = new HashSet<Property>();
-		if (event.getRecurrence() != null
-				&& event.getRecurrence().getExceptions() != null) {
-
-			for (Date d : event.getRecurrence().getExceptions()) {
-
-				boolean find = false;
-				for (Event excp : event.getRecurrence().getEventExceptions()) {
-					if (excp.getStartDate().equals(d)) {
-						find = true;
-						break;
-					}
-				}
-				if (!find) {
-					net.fortuna.ical4j.model.Date da = null;
-					if (event.isAllday()) {
-						da = new net.fortuna.ical4j.model.Date(d);
-					} else {
-						da = new DateTime(d);
-					}
-
-					Property extd = new Property("EXDATE",
-							PropertyFactoryImpl.getInstance()) {
-
-						private static final long serialVersionUID = 1209944763015081277L;
-						private String value;
-
-						@Override
-						public void validate() throws ValidationException {
-							//bypass validation
-						}
-
-						@Override
-						public void setValue(String arg0) throws IOException,
-								URISyntaxException, ParseException {
-							this.value = arg0;
-						}
-
-						@Override
-						public String getValue() {
-							return this.value;
-						}
-					};
-
-					try {
-						extd.getParameters().add(new Value("DATE"));
-						extd.setValue(da.toString());
-						ret.add(extd);
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
-					}
-				}
-			}
+	/* package */ ExDate getExDate(Event event) {
+		EventRecurrence eventRecurrence = event.getRecurrence();
+		if (eventHasExceptions(eventRecurrence)) {
+			return buildExDate(eventRecurrence);
+		} else {
+			return null;
 		}
-		return ret;
+	}
+
+	private boolean eventHasExceptions(EventRecurrence eventRecurrence) {
+		if (eventRecurrence == null) {
+			return false;
+		} else if (eventRecurrence.hasException() || eventRecurrence.hasEventException()) {
+			return true;
+		}
+		return false;
+	}
+
+	private ExDate buildExDate(EventRecurrence eventRecurrence) {
+		DateList exceptionDates = new DateList();
+
+		for (Date exceptionDeleted : eventRecurrence.getExceptions()) {
+			exceptionDates.add(new DateTime(exceptionDeleted));
+		}
+		for (Event exception : eventRecurrence.getEventExceptions()) {
+			exceptionDates.add(new DateTime(exception.getRecurrenceId()));
+		}
+		return new ExDate(exceptionDates);
 	}
 
 	/* package */ VAlarm getVAlarm(Integer alert) {

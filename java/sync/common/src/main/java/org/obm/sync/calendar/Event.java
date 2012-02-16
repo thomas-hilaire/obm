@@ -521,6 +521,11 @@ public class Event implements Indexed<Integer> {
 		return (this.getRecurrence() != null && getRecurrence().isRecurrent()); 
 	}
 
+
+	public boolean hasAnyExceptionAtDate(Date exceptionDateToFind) {
+		return recurrence.hasAnyExceptionAtDate(exceptionDateToFind);
+	}
+
 	@Override
 	public final int hashCode() {
 		return Objects.hashCode(title, description, uid, extId, privacy, owner,
