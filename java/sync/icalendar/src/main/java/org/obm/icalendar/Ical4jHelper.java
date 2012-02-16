@@ -131,10 +131,10 @@ import org.obm.sync.calendar.RecurrenceKind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
-
 import com.google.inject.Singleton;
 
 import fr.aliacom.obm.common.domain.ObmDomain;
@@ -337,7 +337,7 @@ public class Ical4jHelper {
 		appendSequence(event, vEvent.getSequence());
 		appendDate(event, vEvent.getStartDate());
 		appendDuration(event, vEvent.getStartDate(), vEvent.getEndDate());
-		appendAllDay(event, vEvent.getStartDate(), vEvent.getEndDate());
+		appendAllDay(event, vEvent.getDuration());
 		appendPriority(event, vEvent.getPriority());
 		appendRecurrenceId(event, vEvent.getRecurrenceId());
 
@@ -471,7 +471,7 @@ public class Ical4jHelper {
 		}
 	}
 
-	/* package */ void appendAllDay(Event event, DtStart startDate, DateProperty endDate) {
+	@VisibleForTesting void appendAllDay(Event event, DtStart startDate, DateProperty endDate) {
 		if (endDate != null && startDate != null && startDate.getDate() != null && endDate.getDate() != null)  {
 			if (startDate.getDate() instanceof DateTime	|| endDate.getDate() instanceof DateTime) {
 				event.setAllday(false);
@@ -479,6 +479,24 @@ public class Ical4jHelper {
 			}
 		}		
 		event.setAllday(true);
+	}
+
+	@VisibleForTesting void appendAllDay(Event event, Duration duration) {
+		event.setAllday(isAllDayDuration(duration));
+	}
+
+	private boolean isAllDayDuration(Duration duration) {
+		if (duration == null) {
+			return false;
+		}
+		
+		Dur dur = duration.getDuration();
+		boolean isAllDay = dur.getDays() > 0
+				&& dur.getWeeks() == 0
+				&& dur.getHours() == 0
+				&& dur.getMinutes() == 0
+				&& dur.getSeconds() == 0;
+		return isAllDay;
 	}
 
 	private void appendDuration(Event event, DtStart startDate,
@@ -649,7 +667,7 @@ public class Ical4jHelper {
 		}
 		appendCategoryToICS(prop, event);
 		appendDtStartToICS(prop, event);
-		appendDtEndToICS(prop, event);
+		appendDtEndOrDurationToICS(prop, event);
 		appendDescriptionToICS(prop, event);
 		appendLocationToICS(prop, event);
 		appendTranspToICS(prop, event);
@@ -854,14 +872,18 @@ public class Ical4jHelper {
 
 	}
 
-	private void appendDtEndToICS(PropertyList prop, Event event) {
-		DtEnd dtEnd = getDtEnd(event.getStartDate(), event.getDuration(),
-				event.isAllday());
-		if (dtEnd != null) {
-			prop.add(dtEnd);
+	private void appendDtEndOrDurationToICS(PropertyList prop, Event event) {
+		Property dtEndOrDurationProperty = null;
+		if (event.isAllday()) {
+			dtEndOrDurationProperty = getDuration(event.getStartDate(), event.getEndDate());
+		} else {
+			dtEndOrDurationProperty = getDtEnd(event.getEndDate());
+		}
+		if (dtEndOrDurationProperty != null) {
+			prop.add(dtEndOrDurationProperty);
 		}
 	}
-	
+
 	private void appendLastModified(PropertyList prop, Event event) {
 		if(event.getTimeUpdate() != null){
 			prop.add(new LastModified(new DateTime(event.getTimeUpdate().getTime())));
@@ -879,7 +901,7 @@ public class Ical4jHelper {
 	}
 
 	private void appendDtStartToICS(PropertyList prop, Event event) {
-		prop.add(getDtStart(event.getStartDate(), event.isAllday()));
+		prop.add(getDtStart(event.getStartDate()));
 	}
 
 	private void appendCategoryToICS(PropertyList prop, Event event) {
@@ -1447,14 +1469,12 @@ public class Ical4jHelper {
 		return new DtEnd(new DateTime(end));
 	}
 
-	/* package */ DtStart getDtStart(Date start, Boolean isAllDay) {
-		net.fortuna.ical4j.model.Date dt = null;
-		if (isAllDay) {
-			dt = new net.fortuna.ical4j.model.Date(start.getTime() + SECONDS_IN_DAY);
-		} else {
-			dt = new DateTime(start);
-		}
-		return new DtStart(dt, true);
+	@VisibleForTesting DtStart getDtStart(Date start) {
+		return new DtStart(new DateTime(start), true);
+	}
+
+	@VisibleForTesting Duration getDuration(Date startDate, Date endDate) {
+		return new Duration(startDate, endDate);
 	}
 
 	private RecurrenceId getRecurrenceId(Event event) {
@@ -1623,7 +1643,7 @@ public class Ical4jHelper {
 		Organizer orga = getOrganizer("", fb.getOwner());
 		vfb.getProperties().add(orga);
 
-		DtStart st = getDtStart(fb.getStart(), false);
+		DtStart st = getDtStart(fb.getStart());
 		vfb.getProperties().add(st);
 
 		DtEnd en = getDtEnd(fb.getEnd());
@@ -1637,7 +1657,7 @@ public class Ical4jHelper {
 		}
 
 		for (FreeBusyInterval line : fbls) {
-			DtStart start = getDtStart(line.getStart(), line.isAllDay());
+			DtStart start = getDtStart(line.getStart());
 			DtEnd end = getDtEnd(line.getStart(), line.getDuration(),
 					line.isAllDay());
 			if (start != null && end != null) {
