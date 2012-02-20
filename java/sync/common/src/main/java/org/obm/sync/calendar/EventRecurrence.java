@@ -55,6 +55,7 @@ import com.google.common.base.Preconditions;
 
 public class EventRecurrence {
 
+	private static final int UNSPECIFIED_FREQUENCY_VALUE = 0;
 	private String days;
 	private Date end;
 	private int frequence;
@@ -252,6 +253,10 @@ public class EventRecurrence {
 			}
 		}
 		eventExceptions = eventExceptionsCopy;
+	}
+
+	public boolean frequencyIsSpecified() {
+		return frequence != UNSPECIFIED_FREQUENCY_VALUE;
 	}
 	
 	@Override

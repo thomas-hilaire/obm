@@ -264,11 +264,18 @@ public class ObmEventToMSEventConverterImpl implements ObmEventToMSEventConverte
 		}
 		r.setUntil(recurrence.getEnd());
 
-		r.setInterval(recurrence.getFrequence());
+		r.setInterval(getInterval(recurrence));
 
 		return r;
 	}
 
+	private int getInterval(EventRecurrence recurrence) {
+		if (recurrence.frequencyIsSpecified()) {
+			return recurrence.getFrequence();
+		} else {
+			return ACTIVESYNC_DEFAULT_FREQUENCY;
+		}
+	}
 
 	private Set<RecurrenceDayOfWeek> daysOfWeek(String string) {
 		char[] days = string.toCharArray();
